@@ -116,7 +116,7 @@ print("Calculate NDVI.")
 ndvi = ((nbar_clean.nir-nbar_clean.red)/(nbar_clean.nir+nbar_clean.red))
 print(ndvi.shape)
 
-
+print("Setup plotting colours etc.")
 #This controls the colour maps used for plotting NDVI
 ndvi_cmap = mpl.colors.ListedColormap(['blue','#ffcc66','#ffffcc','#ccff66','#2eb82e','#009933','#006600'])
 ndvi_bounds = [-1, 0, 0.1, 0.25, 0.35, 0.5, 0.8, 1]
@@ -124,11 +124,14 @@ ndvi_norm = mpl.colors.BoundaryNorm(ndvi_bounds, ndvi_cmap.N)
 ndvi.attrs['crs'] = crs
 ndvi.attrs['affine'] = affine
 
+print("Calculate annual mean NDVI")
 #Calculate annual average NDVI values
 annual_ndvi = ndvi.groupby('time.year')
 annual_mean = annual_ndvi.mean(dim = 'time') # .mean can be replaced by max, min, median, 
 annual_mean_landonly = annual_mean.where(annual_mean>0)
+print(annual_mean_landonly.shape)
 
+print("Plot annual mean NDVI")
 annual_mean_landonly.plot(col='time', col_wrap=4)
 plt.savefig('~/Kakadu_AnnualMeanNDVI.png')
 plt.close()
