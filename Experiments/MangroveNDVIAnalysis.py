@@ -132,11 +132,36 @@ annual_mean_landonly = annual_mean.where(annual_mean>0)
 print(annual_mean_landonly.shape)
 
 print("Plot annual mean NDVI")
-annual_mean_landonly.plot(col='time', col_wrap=4)
+annual_mean_landonly.plot(col='time', col_wrap=2)
 plt.savefig('~/Kakadu_AnnualMeanNDVI.png')
 plt.close()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 """
+
+
+
+
+
+
+
+
+
+
 # calculate two-monthly average NDVI for start of trend
 two_monthly_ndvi = ndvi.loc['2015-1':'2015-2']
 two_monthly_ndvi.shape
@@ -267,9 +292,49 @@ two_monthly_ndvi_change_comb = xr.concat([two_monthly_ndvi_change1_landonly,two_
 two_monthly_ndvi_change_comb.shape
 #two_monthly_ndvi_change_comb
 two_monthly_ndvi_change_comb.plot(col = 'concat_dims', col_wrap=3)
+
+
+
+
+
+
+
+# this converts the map x coordinates into image x coordinates
+image_coords = ~affine * (x, y)
+imagex = int(image_coords[0])
+imagey = int(image_coords[1])
+
+#retrieve the time series for the pixel location clicked above
+ts_ndvi = ndvi.isel(x=[imagex],y=[imagey]).dropna('time', how = 'any')
+
+# output time-series plot
+
+fig = plt.figure(figsize=(8,5))
+plt.show()
+
+firstyear = start_of_epoch
+lastyear = end_of_epoch
+ts_ndvi.plot(linestyle= '--', c= 'b', marker = '8', mec = 'b', mfc ='r')
+plt.grid()   
+plt.axis([firstyear, lastyear, 0, 1])
+
+
+
+
+
+#Plotting image, view transect and select a location to retrieve a time series
+fig = plt.figure()
+#Plot the mean NDVI values for a year of interest (yoi)
+#Dark green = high amounts of green veg with yellow and oranges lower amounts
+#Blue indicates NDVI < 0 typically associated with water
+yoi = 2014
+#plt.title('Average annual NDVI for '+str(yoi))
+arr_yoi = annual_mean_landonly.sel(year =yoi)
+plt.imshow(arr_yoi.squeeze(), interpolation = 'nearest', cmap = ndvi_cmap, norm = ndvi_norm,
+           extent=[arr_yoi.coords['x'].min(), arr_yoi.coords['x'].max(),
+                   arr_yoi.coords['y'].min(), arr_yoi.coords['y'].max()])
+
+
 """
-
-
-
 
 
