@@ -1,0 +1,8 @@
+ssh pjb552@raijin.nci.org.au
+
+qsub -I -l walltime=04:00:00,mem=4Gb -P r78 -q express
+
+module use /g/data/v10/public/modules/modulefiles
+
+module load agdc-py3-prod
+
