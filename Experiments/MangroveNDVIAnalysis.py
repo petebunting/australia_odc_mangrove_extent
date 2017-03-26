@@ -51,6 +51,8 @@ query['x'] = (lon_min, lon_max)
 query['y'] = (lat_max, lat_min)
 query['crs'] = 'EPSG:4326'
 
+
+print("Read pixel quality information.")
 #Group PQ by solar day to avoid idosyncracies of N/S overlap differences in PQ algorithm performance
 pq_albers_product = dc.index.products.get_by_name(sensors[0]+'_pq_albers')
 valid_bit = pq_albers_product.measurements['pixelquality']['flags_definition']['contiguous']['bits']
@@ -79,8 +81,10 @@ mask_components = {'cloud_acca':          'no_cloud',
 
 
 #Retrieve the NBAR and PQ data for sensor n
+print("Read pixel image data into memory.")
 sensor_clean = {}
 for sensor in sensors:
+    print(sensor)
     #Load the NBAR and corresponding PQ
     sensor_nbar = dc.load(product= sensor+'_nbar_albers', group_by='solar_day', measurements = bands_of_interest, **query)
     sensor_pq = dc.load(product=sensor+'_pq_albers', group_by='solar_day', fuse_func=pq_fuser, **query)
@@ -98,6 +102,7 @@ for sensor in sensors:
 
 
 #Concatenate data from different sensors together and sort so that observations are sorted by time rather than sensor
+print("Merge data from different sensors.")
 nbar_clean = xr.concat(sensor_clean.values(), dim='time')
 time_sorted = nbar_clean.time.argsort()
 nbar_clean = nbar_clean.isel(time=time_sorted)
@@ -107,6 +112,7 @@ nbar_clean.attrs['affine'] = affine
 
 
 #calculate NDVI
+print("Calculate NDVI.")
 ndvi = ((nbar_clean.nir-nbar_clean.red)/(nbar_clean.nir+nbar_clean.red))
 print(ndvi.shape)
 
