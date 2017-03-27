@@ -9,9 +9,6 @@ cmds = []
 cmdBase = 'python Extract_AnnualNDVI_Tiles.py '
 outFileBase = os.path.join('/g/data/r78/pjb552/ndvitiles/', year)
 
-
-print()
-
 for tile in range(len(gmwTiles)):
     outTileFilename = 'ndvi'+year+'_'+str(tile)+'.nc'
     outTileFile = os.path.join(outFileBase, outTileFilename)

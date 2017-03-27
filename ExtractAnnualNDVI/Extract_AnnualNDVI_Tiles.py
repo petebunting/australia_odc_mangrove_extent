@@ -7,6 +7,8 @@ import numpy
 from datacube.storage import masking
 import xarray
 import argparse
+import multiprocessing
+import pandas
 
 def pq_fuser(dest, src):
     valid_bit = 8
@@ -21,6 +23,9 @@ def pq_fuser(dest, src):
 
 ##tileList = pandas.read_csv('./GMW_10kGrid_AustMangRegions_csv.csv', delimiter = ',')
 ##print(tileList)
+
+def _extractNDVIFromCube(params):
+    extractNDVIFromCube(params['tileFile'], params['minLat'], params['maxLat'], params['minLon'], params['maxLon'], params['year'])
 
 def extractNDVIFromCube(tileFile, minLat, maxLat, minLon, maxLon, year):
 
@@ -97,23 +102,45 @@ def extractNDVIFromCube(tileFile, minLat, maxLat, minLon, maxLon, year):
     print("Save Composite to netcdf")
     ndviMean.to_netcdf(path = tileFile, mode = 'w')
 
+nCores = 16
+csvFile = './GMW_10kGrid_AustMangRegions_csv.csv'
+gmwTiles = pandas.read_csv('./GMW_10kGrid_AustMangRegions_csv.csv', delimiter = ',')
+year = '2010'
+outFileBase = os.path.join('/g/data/r78/pjb552/ndvitiles/', year)
+
+cmds = []
+for tile in range(len(gmwTiles)):
+    outTileFilename = 'ndvi'+year+'_'+str(tile)+'.nc'
+    outTileFile = os.path.join(outFileBase, outTileFilename)
+    print(outTileFile)
+    cmd = dict()
+    cmd['tileFile'] = outTileFile
+    cmd['minLat'] = gmwTiles['MinY'][tile]
+    cmd['maxLat'] = gmwTiles['MaxY'][tile]
+    cmd['minLon'] = gmwTiles['MinX'][tile]
+    cmd['maxLon'] = gmwTiles['MaxX'][tile]
+    cmd['year'] = year
+    cmds.append(cmd)
+
+p = multiprocessing.Pool(nCores)
+p.map(_extractNDVIFromCube, cmds))
+
+
+"""
 if __name__ == '__main__':
-    """
-    The command line user interface
-    """
     parser = argparse.ArgumentParser(prog='Extract_AnnualNDVI_Tiles.py', description='''Create annual NDVI composite for a tile''')
 
-    parser.add_argument("--tileFile", type=str, required=True, help='''Output netcdf file.''')
-    parser.add_argument("--minlat", type=float, required=True, help='''min. lat for tile region.''')
-    parser.add_argument("--maxlat", type=float, required=True, help='''max. lat for tile region.''')
-    parser.add_argument("--minlon", type=float, required=True, help='''min. lon for tile region.''')
-    parser.add_argument("--maxlon", type=float, required=True, help='''max. lon for tile region.''')
-    parser.add_argument("--year", type=str, required=True, help='''Year of interest.''')
+    parser.add_argument("--tileFile", type=str, required=True, help='Output netcdf file.')
+    parser.add_argument("--minlat", type=float, required=True, help='min. lat for tile region.')
+    parser.add_argument("--maxlat", type=float, required=True, help='max. lat for tile region.')
+    parser.add_argument("--minlon", type=float, required=True, help='min. lon for tile region.')
+    parser.add_argument("--maxlon", type=float, required=True, help='max. lon for tile region.')
+    parser.add_argument("--year", type=str, required=True, help='Year of interest.')
     
     # Call the parser to parse the arguments.
     args = parser.parse_args()
     
     extractNDVIFromCube(args.tileFile, args.minlat, args.maxlat, args.minlon, args.maxlon, args.year)
-
+"""
 
 
