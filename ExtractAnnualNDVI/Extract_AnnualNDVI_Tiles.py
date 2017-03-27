@@ -70,38 +70,40 @@ def extractNDVIFromCube(tileFile, minLat, maxLat, minLon, maxLon, year):
         sensor_nbar = dc.load(product= sensor+'_nbar_albers', group_by='solar_day', measurements = bands_of_interest, **query)
         if bool(sensor_nbar):
             sensor_pq = dc.load(product=sensor+'_pq_albers', group_by='solar_day', fuse_func=pq_fuser, **query)
-            #grab the projection info before masking/sorting
-            crs = sensor_nbar.crs
-            crswkt = sensor_nbar.crs.wkt
-            affine = sensor_nbar.affine
-            #this line is to make sure there's PQ to go with the NBAR
-            sensor_nbar = sensor_nbar.sel(time = sensor_pq.time)
-            #Apply the PQ masks to the NBAR
-            cloud_free = masking.make_mask(sensor_pq, **mask_components)
-            good_data = cloud_free.pixelquality.loc[start_of_epoch:end_of_epoch]
-            sensor_nbar = sensor_nbar.where(good_data)
-            sensor_clean[sensor] = sensor_nbar
+            if bool(sensor_pq):
+                #grab the projection info before masking/sorting
+                crs = sensor_nbar.crs
+                crswkt = sensor_nbar.crs.wkt
+                affine = sensor_nbar.affine
+                #this line is to make sure there's PQ to go with the NBAR
+                sensor_nbar = sensor_nbar.sel(time = sensor_pq.time)
+                #Apply the PQ masks to the NBAR
+                cloud_free = masking.make_mask(sensor_pq, **mask_components)
+                good_data = cloud_free.pixelquality.loc[start_of_epoch:end_of_epoch]
+                sensor_nbar = sensor_nbar.where(good_data)
+                sensor_clean[sensor] = sensor_nbar
+    
+    if bool(sensor_clean):
+        #Concatenate data from different sensors together and sort so that observations are sorted by time rather than sensor
+        print("Merge data from different sensors.")
+        nbar_clean = xarray.concat(sensor_clean.values(), dim='time')
+        time_sorted = nbar_clean.time.argsort()
+        nbar_clean = nbar_clean.isel(time=time_sorted)
+        nbar_clean.attrs['affine'] = affine
+        nbar_clean.attrs['crs'] = crswkt
         
-    #Concatenate data from different sensors together and sort so that observations are sorted by time rather than sensor
-    print("Merge data from different sensors.")
-    nbar_clean = xarray.concat(sensor_clean.values(), dim='time')
-    time_sorted = nbar_clean.time.argsort()
-    nbar_clean = nbar_clean.isel(time=time_sorted)
-    nbar_clean.attrs['affine'] = affine
-    nbar_clean.attrs['crs'] = crswkt
-    
-    print("Calculate NDVI.")
-    ndvi = ((nbar_clean.nir-nbar_clean.red)/(nbar_clean.nir+nbar_clean.red))
-    ndvi.attrs['affine'] = affine
-    ndvi.attrs['crs'] = crswkt
-    
-    print("Create Composite")
-    ndviMean = ndvi.mean(dim = 'time')
-    ndviMean.attrs['affine'] = affine
-    ndviMean.attrs['crs'] = crswkt
-    
-    print("Save Composite to netcdf")
-    ndviMean.to_netcdf(path = tileFile, mode = 'w')
+        print("Calculate NDVI.")
+        ndvi = ((nbar_clean.nir-nbar_clean.red)/(nbar_clean.nir+nbar_clean.red))
+        ndvi.attrs['affine'] = affine
+        ndvi.attrs['crs'] = crswkt
+        
+        print("Create Composite")
+        ndviMean = ndvi.mean(dim = 'time')
+        ndviMean.attrs['affine'] = affine
+        ndviMean.attrs['crs'] = crswkt
+        
+        print("Save Composite to netcdf")
+        ndviMean.to_netcdf(path = tileFile, mode = 'w')
 
 nCores = 16
 csvFile = './GMW_10kGrid_AustMangRegions_csv.csv'
