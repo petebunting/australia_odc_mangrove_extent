@@ -9,6 +9,7 @@ import xarray
 import argparse
 import multiprocessing
 import pandas
+import os.path
 
 def pq_fuser(dest, src):
     valid_bit = 8
