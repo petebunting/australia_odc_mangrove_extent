@@ -70,18 +70,17 @@ def extractNDVIFromCube(tileFile, minLat, maxLat, minLon, maxLon, year):
         sensor_nbar = dc.load(product= sensor+'_nbar_albers', group_by='solar_day', measurements = bands_of_interest, **query)
         if bool(sensor_nbar):
             sensor_pq = dc.load(product=sensor+'_pq_albers', group_by='solar_day', fuse_func=pq_fuser, **query)
-            if bool(sensor_pq):
-                #grab the projection info before masking/sorting
-                crs = sensor_nbar.crs
-                crswkt = sensor_nbar.crs.wkt
-                affine = sensor_nbar.affine
-                #this line is to make sure there's PQ to go with the NBAR
-                sensor_nbar = sensor_nbar.sel(time = sensor_pq.time)
-                #Apply the PQ masks to the NBAR
-                cloud_free = masking.make_mask(sensor_pq, **mask_components)
-                good_data = cloud_free.pixelquality.loc[start_of_epoch:end_of_epoch]
-                sensor_nbar = sensor_nbar.where(good_data)
-                sensor_clean[sensor] = sensor_nbar
+            #grab the projection info before masking/sorting
+            crs = sensor_nbar.crs
+            crswkt = sensor_nbar.crs.wkt
+            affine = sensor_nbar.affine
+            #this line is to make sure there's PQ to go with the NBAR
+            sensor_nbar = sensor_nbar.sel(time = sensor_pq.time)
+            #Apply the PQ masks to the NBAR
+            cloud_free = masking.make_mask(sensor_pq, **mask_components)
+            good_data = cloud_free.pixelquality.loc[start_of_epoch:end_of_epoch]
+            sensor_nbar = sensor_nbar.where(good_data)
+            sensor_clean[sensor] = sensor_nbar
     
     if bool(sensor_clean):
         #Concatenate data from different sensors together and sort so that observations are sorted by time rather than sensor
@@ -105,6 +104,7 @@ def extractNDVIFromCube(tileFile, minLat, maxLat, minLon, maxLon, year):
         print("Save Composite to netcdf")
         ndviMean.to_netcdf(path = tileFile, mode = 'w')
 
+"""
 nCores = 16
 csvFile = './GMW_10kGrid_AustMangRegions_csv.csv'
 gmwTiles = pandas.read_csv('./GMW_10kGrid_AustMangRegions_csv.csv', delimiter = ',')
@@ -127,9 +127,9 @@ for tile in range(len(gmwTiles)):
 
 p = multiprocessing.Pool(nCores)
 p.map(_extractNDVIFromCube, cmds)
-
-
 """
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Extract_AnnualNDVI_Tiles.py', description='''Create annual NDVI composite for a tile''')
 
@@ -144,6 +144,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     extractNDVIFromCube(args.tileFile, args.minlat, args.maxlat, args.minlon, args.maxlon, args.year)
-"""
 
 
