@@ -62,7 +62,7 @@ def extractNDVIFromCube(tileFile, minLat, maxLat, minLon, maxLon, year):
         print(sensor)
         #Load the NBAR and corresponding PQ
         sensor_nbar = dc.load(product= sensor+'_nbar_albers', group_by='solar_day', measurements = bands_of_interest, **query)
-        if not sensor_nbar is None:
+        if bool(sensor_nbar):
             sensor_pq = dc.load(product=sensor+'_pq_albers', group_by='solar_day', fuse_func=pq_fuser, **query)
             #grab the projection info before masking/sorting
             crs = sensor_nbar.crs
@@ -81,18 +81,18 @@ def extractNDVIFromCube(tileFile, minLat, maxLat, minLon, maxLon, year):
     nbar_clean = xarray.concat(sensor_clean.values(), dim='time')
     time_sorted = nbar_clean.time.argsort()
     nbar_clean = nbar_clean.isel(time=time_sorted)
-    nbar_clean.attrs['crs'] = crs
     nbar_clean.attrs['affine'] = affine
+    nbar_clean.attrs['crs'] = crswkt
     
     print("Calculate NDVI.")
     ndvi = ((nbar_clean.nir-nbar_clean.red)/(nbar_clean.nir+nbar_clean.red))
     ndvi.attrs['affine'] = affine
-    ndvi.attrs['crs'] = crs
+    ndvi.attrs['crs'] = crswkt
     
     print("Create Composite")
     ndviMean = ndvi.mean(dim = 'time')
     ndviMean.attrs['affine'] = affine
-    ndviMean.attrs['crs'] = crs
+    ndviMean.attrs['crs'] = crswkt
     
     print("Save Composite to netcdf")
     ndviMean.to_netcdf(path = tileFile, mode = 'w')
