@@ -10,5 +10,5 @@ module load agdc-py3-prod
 
 module load parallel
 
-parallel -j 16 < CreateExtractAnnualNDVICmds.py
+parallel -j 16 < Calc2010AnnualNDVI.sh
 
