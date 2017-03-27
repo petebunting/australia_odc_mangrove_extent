@@ -123,7 +123,7 @@ for tile in range(len(gmwTiles)):
     cmds.append(cmd)
 
 p = multiprocessing.Pool(nCores)
-p.map(_extractNDVIFromCube, cmds))
+p.map(_extractNDVIFromCube, cmds)
 
 
 """
