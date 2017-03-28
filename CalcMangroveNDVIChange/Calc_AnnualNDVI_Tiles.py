@@ -183,8 +183,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     gmwMangExtShp = '/g/data/r78/pjb552/gmwExtent/GMW_Australia_MangroveExtent2010_AlbersEA_shp.shp'
-    ndviThresLow = 0.3
-    ndviThresHigh = 0.7
+    ndviThresLow = 0.4
+    ndviThresHigh = 0.6
     
     calcMangNDVIMangPxlFromCube(args.tileNCFile, args.tileNCAMCFile, args.tileNCCMCFile, args.tileAFile, args.minlat, args.maxlat, args.minlon, args.maxlon, args.year, gmwMangExtShp, ndviThresLow, ndviThresHigh)
 
