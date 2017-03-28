@@ -38,7 +38,7 @@ import sys
 from time import strftime
 import argparse
 
-def createOutputFiles(self, inputFile, outputFile, memory, timeStr, nCores, project):                
+def createOutputFiles(inputFile, outputFile, memory, timeStr, nCores, project):                
     outCmdsFile = open(outputSubFile, 'w')
     outCmdsFile.write("#!/bin/bash \n")
     outCmdsFile.write("#PBS -P " + project + str("\n"))
