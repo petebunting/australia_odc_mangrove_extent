@@ -7,8 +7,6 @@ import numpy
 from datacube.storage import masking
 import xarray
 import argparse
-import multiprocessing
-import pandas
 import os.path
 
 def pq_fuser(dest, src):
@@ -21,12 +19,6 @@ def pq_fuser(dest, src):
     both_data_mask = (valid_val & dest & src).astype(bool)
     numpy.copyto(dest, src & dest, where=both_data_mask)
 
-
-##tileList = pandas.read_csv('./GMW_10kGrid_AustMangRegions_csv.csv', delimiter = ',')
-##print(tileList)
-
-def _extractNDVIFromCube(params):
-    extractNDVIFromCube(params['tileFile'], params['minLat'], params['maxLat'], params['minLon'], params['maxLon'], params['year'])
 
 def extractNDVIFromCube(tileFile, minLat, maxLat, minLon, maxLon, year):
 
@@ -103,32 +95,6 @@ def extractNDVIFromCube(tileFile, minLat, maxLat, minLon, maxLon, year):
         
         print("Save Composite to netcdf")
         ndviMean.to_netcdf(path = tileFile, mode = 'w')
-
-"""
-nCores = 16
-csvFile = './GMW_10kGrid_AustMangRegions_csv.csv'
-gmwTiles = pandas.read_csv('./GMW_10kGrid_AustMangRegions_csv.csv', delimiter = ',')
-year = '2010'
-outFileBase = os.path.join('/g/data/r78/pjb552/ndvitiles/', year)
-
-cmds = []
-for tile in range(len(gmwTiles)):
-    outTileFilename = 'ndvi'+year+'_'+str(tile)+'.nc'
-    outTileFile = os.path.join(outFileBase, outTileFilename)
-    print(outTileFile)
-    cmd = dict()
-    cmd['tileFile'] = outTileFile
-    cmd['minLat'] = gmwTiles['MinY'][tile]
-    cmd['maxLat'] = gmwTiles['MaxY'][tile]
-    cmd['minLon'] = gmwTiles['MinX'][tile]
-    cmd['maxLon'] = gmwTiles['MaxX'][tile]
-    cmd['year'] = year
-    cmds.append(cmd)
-
-p = multiprocessing.Pool(nCores)
-p.map(_extractNDVIFromCube, cmds)
-"""
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Extract_AnnualNDVI_Tiles.py', description='''Create annual NDVI composite for a tile''')

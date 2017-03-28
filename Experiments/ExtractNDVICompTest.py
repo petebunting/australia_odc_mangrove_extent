@@ -19,8 +19,7 @@ def pq_fuser(dest, src):
 dc = datacube.Datacube(app='ExtractAnnualNDVI')
 
 #Define wavelengths/bands of interest, remove this kwarg to retrieve all bands
-bands_of_interest = ['red', 
-                     'nir']
+bands_of_interest = ['red', 'nir']
 
 minLon = 144.3
 maxLon = 144.4
