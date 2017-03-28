@@ -23,10 +23,6 @@ def pq_fuser(dest, src):
     both_data_mask = (valid_val & dest & src).astype(bool)
     numpy.copyto(dest, src & dest, where=both_data_mask)
 
-
-tileNCAMCFile", type=str, required=True, help='Output netcdf for the low mangrove threshold file.')
-    parser.add_argument("--tileNCCMCFile
-
 def calcMangNDVIMangPxlFromCube(tileNCFile, tileNCAMCFile, tileNCCMCFile, tileAFile, minLat, maxLat, minLon, maxLon, year, mangShpExt, ndviThresLow, ndviThresHigh):
 
     dc = datacube.Datacube(app='CalcAnnualMangroveExtent')
