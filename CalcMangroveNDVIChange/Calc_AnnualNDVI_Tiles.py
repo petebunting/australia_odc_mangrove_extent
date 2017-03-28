@@ -152,7 +152,7 @@ def calcMangNDVIMangPxlFromCube(tileNCFile, tileNCAMCFile, tileNCCMCFile, tileAF
         
         mangroveAreaPxlC.attrs['affine'] = affine
         mangroveAreaPxlC.attrs['crs'] = crswkt
-        print("Save clMangroveAreaPxlC to netcdf")
+        print("Save MangroveAreaPxlC to netcdf")
         mangroveAreaPxlC.to_netcdf(path = tileNCAMCFile, mode = 'w')
         
         clMangroveAreaPxlC.attrs['affine'] = affine
