@@ -29,10 +29,10 @@ for year in years:
        
         outTileName = 'ndvi'+year+'_'+posFileName+'_'+str(tile)
     
-        cmd = cmdBase + ' --tileNCFile ' + os.path.join(outFileBase, outTileName+'_ndvi.nc') + ' --year ' + year
-        cmd = cmd + ' --tileNCAMCFile ' + os.path.join(outFileBase, outTileName+'_mangmask.nc')
-        cmd = cmd + ' --tileNCCMCFile ' + os.path.join(outFileBase, outTileName+'_mangmask_closed.nc')
-        cmd = cmd + ' --tileAFile ' + os.path.join(outFileBase, outTileName+'_pxlcounts.csv')
+        cmd = cmdBase + ' --tileNCFile ' + os.path.join(outFileBase, '/'+outTileName+'_ndvi.nc') + ' --year ' + year
+        cmd = cmd + ' --tileNCAMCFile ' + os.path.join(outFileBase, '/'+outTileName+'_mangmask.nc')
+        cmd = cmd + ' --tileNCCMCFile ' + os.path.join(outFileBase, '/'+outTileName+'_mangmask_closed.nc')
+        cmd = cmd + ' --tileAFile ' + os.path.join(outFileBase, '/'+outTileName+'_pxlcounts.csv')
         cmd = cmd + ' --minlat ' + str(gmwTiles['MinY'][tile])
         cmd = cmd + ' --maxlat ' + str(gmwTiles['MaxY'][tile])
         cmd = cmd + ' --minlon ' + str(gmwTiles['MinX'][tile])
