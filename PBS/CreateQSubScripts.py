@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
         
-    createOutputFiles(args.inputFile, args.outputFile, args.memory, args.timeStr, args.nCores, args.project)
+    createOutputFiles(args.inputFile, args.outputFile, args.memory, args.timeStr, args.nCores, args.projectName)
 
 
 
