@@ -42,8 +42,8 @@ def createOutputFiles(inputFile, outputFile, memory, timeStr, nCores, project):
     outCmdsFile = open(outputFile, 'w')
     outCmdsFile.write("#!/bin/bash \n")
     outCmdsFile.write("#PBS -P " + project + str("\n"))
-    outCmdsFile.write("#PBS -q normal")
-    outCmdsFile.write("#PBS -l walltime="+timeStr+",mem="+memory+",ncpus="+str(nCores))
+    outCmdsFile.write("#PBS -q normal\n")
+    outCmdsFile.write("#PBS -l walltime="+timeStr+",mem="+memory+",ncpus="+str(nCores)+"\n")
     outCmdsFile.write("#PBS -l wd\n\n")
     
     outCmdsFile.write("module use /g/data/v10/public/modules/modulefiles\n")
