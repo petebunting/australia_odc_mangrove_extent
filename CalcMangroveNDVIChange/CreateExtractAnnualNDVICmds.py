@@ -1,7 +1,7 @@
 import pandas
 import os.path
 
-gmwTiles = pandas.read_csv('./GMW_10kGrid_AustMangRegions_csv.csv', delimiter = ',')
+gmwTiles = pandas.read_csv('./GMW_10kGrid_AustMangOnlyRegions_csv.csv', delimiter = ',')
 cmdBase = 'python /home/552/pjb552/agdc_mangrovemonitoring/CalcMangroveNDVIChange/Calc_AnnualNDVI_Tiles.py '
 
 years = ['1987', '1988', '1989', '1990', '1991', '1992', '1993', '1994', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016']
@@ -48,7 +48,7 @@ for year in years:
     f.close()
     
     outQSubFile = 'QSubCalcAnnualNDVIChange_'+year+'.pbs'
-    genQSubCmds.append('python /home/552/pjb552/agdc_mangrovemonitoring/PBS/CreateQSubScripts.py --input ' + outFile + ' --output ' + outQSubFile + ' --memory 32Gb --time 08:00:00 --cores 16 --project r78')
+    genQSubCmds.append('python ../PBS/CreateQSubScripts.py --input ' + outFile + ' --output ' + outQSubFile + ' --memory 32Gb --time 08:00:00 --cores 16 --project r78')
 
 
 outFile = 'GenQSubCalcAnnualNDVIChangeCmds.sh'
