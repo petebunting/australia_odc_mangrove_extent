@@ -42,6 +42,6 @@ f.close()
 outQSubFile = 'QSubCalcAnnualNDVIChange.pbs'
 outFile = 'GenQSubCalcAnnualNDVIChangeCmds.sh'
 f = open(outFile, 'w')
-f.write(str('python ../../PBS/CreateQSubScripts.py --input ' + outFile + ' --output ' + outQSubFile + ' --memory 32Gb --time 08:00:00 --cores 16 --project r78')+'\n')
+f.write(str('python ../../PBS/CreateQSubScripts.py --input ' + outFile + ' --output ' + outQSubFile + ' --memory 128Gb --time 30:00:00 --cores 16 --project r78')+'\n')
 f.flush()
 f.close()
