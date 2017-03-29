@@ -1,0 +1,1 @@
+rsync -azv pjb552@raijin.nci.org.au:/g/data/r78/pjb552/MangNDVIChange/* ./OzMangroveChange/.

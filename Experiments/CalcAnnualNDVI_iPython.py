@@ -27,11 +27,9 @@ maxLon = 144.4
 maxLat = -38.0
 minLat = -38.1
 
-year = '2010'
-
 mangShpExt = '/g/data/r78/pjb552/gmwExtent/GMW_Australia_MangroveExtent2010_AlbersEA_shp.shp'
-ndviThresLow = 0.3
-ndviThresHigh = 0.7
+ndviThresLow = 0.4
+ndviThresHigh = 0.6
 
 dc = datacube.Datacube(app='CalcAnnualMangroveExtent')
     
@@ -42,9 +40,9 @@ bands_of_interest = ['red', 'nir']
 sensors = ['ls8', 'ls7', 'ls5']
 
 #define temporal range
-start_of_epoch = year+'-01-01'
+start_of_epoch = '1987-01-01'
 # latest observation
-end_of_epoch = year+'-12-31'
+end_of_epoch = '2016-12-31'
 
 query = {'time': (start_of_epoch, end_of_epoch),}
 query['x'] = (minLon, maxLon)
@@ -103,7 +101,8 @@ if bool(sensor_clean):
     ndvi.attrs['crs'] = crswkt
     
     print("Create Composite")
-    ndviMean = ndvi.mean(dim = 'time')
+    ndviAnnual = ndvi.groupby('time.year')
+    ndviMean = ndviAnnual.mean(dim = 'time')
     ndviMean.attrs['affine'] = affine
     ndviMean.attrs['crs'] = crswkt
     
@@ -125,8 +124,8 @@ if bool(sensor_clean):
     vx_min, vx_max, vy_min, vy_max = source_layer.GetExtent() # this is extent of Australia
     
     # Create the destination extent
-    yt,xt = ndviMean.shape
-    
+    yt,xt = ndviMean.sel(year=2010).shape
+        
     # set up mask image including projection
     target_ds = gdal.GetDriverByName('MEM').Create('', xt, yt, gdal.GDT_Byte)
     target_ds.SetGeoTransform(geotransform)
@@ -149,31 +148,29 @@ if bool(sensor_clean):
     mangroveAreaPxlC = mangroveNDVIMean>ndviThresLow
     clMangroveAreaPxlC = mangroveNDVIMean>ndviThresHigh
     
-    tileAFile = 'MangAreas.csv'
-    
-    numMangPxls = numpy.sum(mangroveAreaPxlC.data)
-    numClMangPxls = numpy.sum(clMangroveAreaPxlC.data) 
-    pxlCountSeries = pandas.Series([numMangPxls, numClMangPxls], index=['MangPxls', 'MangPxlsCl'])
-    pxlCountSeries.to_csv(tileAFile)   
-    
-    tileNCAMCFile = 'MangAreaLowThres.nc'
-    tileNCCMCFile = 'MangAreaHighThres.nc'
-    tileNCFile = 'ndvi.nc'
-    
     mangroveAreaPxlC.attrs['affine'] = affine
     mangroveAreaPxlC.attrs['crs'] = crswkt
-    print("Save clMangroveAreaPxlC to netcdf")
-    mangroveAreaPxlC.to_netcdf(path = tileNCAMCFile, mode = 'w')
-    
     clMangroveAreaPxlC.attrs['affine'] = affine
     clMangroveAreaPxlC.attrs['crs'] = crswkt
-    print("Save clMangroveAreaPxlC to netcdf")
-    clMangroveAreaPxlC.to_netcdf(path = tileNCCMCFile, mode = 'w')        
-    
     mangroveNDVIMean.attrs['affine'] = affine
     mangroveNDVIMean.attrs['crs'] = crswkt
-    print("Save Composite to netcdf")
-    mangroveNDVIMean.to_netcdf(path = tileNCFile, mode = 'w')
+    
+    years = [1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016]
+    for yearVal in years:    
+        tileAFile = 'MangAreas_'+str(yearVal)+'.csv'
+        
+        numMangPxls = numpy.sum(mangroveAreaPxlC.sel(year=yearVal).data)
+        numClMangPxls = numpy.sum(clMangroveAreaPxlC.sel(year=yearVal).data) 
+        pxlCountSeries = pandas.Series([numMangPxls, numClMangPxls], index=['MangPxls', 'MangPxlsCl'])
+        pxlCountSeries.to_csv(tileAFile)   
+        
+        tileNCAMCFile = 'MangAreaLowThres_'+str(yearVal)+'.nc'
+        tileNCCMCFile = 'MangAreaHighThres_'+str(yearVal)+'.nc'
+        tileNCFile = 'ndvi_'+str(yearVal)+'.nc'
+        
+        mangroveAreaPxlC.sel(year=yearVal).to_netcdf(path = tileNCAMCFile, mode = 'w')
+        clMangroveAreaPxlC.sel(year=yearVal).to_netcdf(path = tileNCCMCFile, mode = 'w')                        
+        mangroveNDVIMean.sel(year=yearVal).to_netcdf(path = tileNCFile, mode = 'w')
 
 
 
