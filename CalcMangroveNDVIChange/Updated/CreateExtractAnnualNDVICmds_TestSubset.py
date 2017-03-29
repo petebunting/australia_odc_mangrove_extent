@@ -32,16 +32,16 @@ for tile in range(len(gmwTiles)):
     #print(cmd)
     cmds.append(cmd)
 
-outFile = 'RunCalcAnnualNDVIChange_CapeSubset.sh'
-f = open(outFile, 'w')
+outRunLstFile = 'RunCalcAnnualNDVIChange_CapeSubset.sh'
+f = open(outRunLstFile, 'w')
 for item in cmds:
    f.write(str(item)+'\n')
 f.flush()
 f.close()
 
 outQSubFile = 'QSubCalcAnnualNDVIChange_CapeSubset.pbs'
-outFile = 'GenQSubCalcAnnualNDVIChangeCmds_CapeSubset.sh'
-f = open(outFile, 'w')
-f.write(str('python ../../PBS/CreateQSubScripts.py --input ' + outFile + ' --output ' + outQSubFile + ' --memory 64Gb --time 08:00:00 --cores 8 --project r78')+'\n')
+outGenPBSFile = 'GenQSubCalcAnnualNDVIChangeCmds_CapeSubset.sh'
+f = open(outGenPBSFile, 'w')
+f.write(str('python ../../PBS/CreateQSubScripts.py --input ' + outRunLstFile + ' --output ' + outQSubFile + ' --memory 64Gb --time 08:00:00 --cores 8 --project r78')+'\n')
 f.flush()
 f.close()
