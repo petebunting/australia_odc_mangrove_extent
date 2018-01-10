@@ -87,7 +87,7 @@ def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcT
     target_ds.SetProjection(albers.ExportToWkt())
     
         
-    pxlStatsArr = numpy.zeros([len(years)])
+    pxlStatsArr = numpy.zeros([len(years)], dtype=int)
     f = open(outStatsFile, 'w')
     f.write('Year, PixelCount\n')
     idx = 0
