@@ -107,16 +107,27 @@ def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxL
 
 
 if __name__ == '__main__':
-    """
+
     parser = argparse.ArgumentParser(prog='CalcMangroveChangeWithAnnualFC.py', description='''Produce an annual mangrove map using the Annual Fractional Cover Product.''')
 
     parser.add_argument("--minlat", type=float, required=True, help='min. lat for tile region.')
     parser.add_argument("--maxlat", type=float, required=True, help='max. lat for tile region.')
     parser.add_argument("--minlon", type=float, required=True, help='min. lon for tile region.')
     parser.add_argument("--maxlon", type=float, required=True, help='max. lon for tile region.')
+    parser.add_argument("--startyear", type=int, default=1987, required=False, help='Start year for the analysis.')
+    parser.add_argument("--endyear", type=int, default=2016, required=False, help='End year for the analysis.')
+    parser.add_argument("--pvfcthres", type=int, default=30, required=False, help='End year for the analysis.')
+    parser.add_argument("--outimg", type=str, required=True, help='Output image file is mangrove extent with a band for each year.')
+    parser.add_argument("--outstats", type=str, required=True, help='Output stats file with pixel count for mangrove extent.')
     
     # Call the parser to parse the arguments.
     args = parser.parse_args()
+    
+    mangShpMask = '/g/data/r78/pjb552/GMW_Mang_Union/GMW_UnionMangroveExtent_v1.2_Australia_epsg3577.shp'
+    
+    calcMangNDVIMangPxlFromCube(args.startyear, args.endyear, args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask, args.pvfcthres, args.outstats, args.outimg)  
+    
+    
     """
     lat_max = -17.5
     lat_min = -17.6
@@ -132,4 +143,4 @@ if __name__ == '__main__':
     #calcMangNDVIMangPxlFromCube(args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask)
     calcMangNDVIMangPxlFromCube(2010, 2015, lat_min, lat_max, lon_min, lon_max, mangShpMask, fcThreshold, outStatsFile, outImgMask)
 
-
+    """
