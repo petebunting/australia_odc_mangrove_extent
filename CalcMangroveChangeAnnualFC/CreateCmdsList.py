@@ -44,7 +44,7 @@ f.close()
 outQSubFile = 'QSubCalcAnnualMangChange.pbs'
 outGenPBSFile = 'GenQSubCalcAnnualMangChangeCmds.sh'
 f = open(outGenPBSFile, 'w')
-f.write(str('python ../PBS/CreateQSubScripts.py --input ' + outRunLstFile + ' --output ' + outQSubFile + ' --memory 8Gb --time 30:00:00 --cores 32 --project r78')+'\n')
+f.write(str('python ../PBS/CreateQSubScripts.py --input ' + outRunLstFile + ' --output ' + outQSubFile + ' --memory 32Gb --time 30:00:00 --cores 16 --project r78')+'\n')
 f.flush()
 f.close()
 
