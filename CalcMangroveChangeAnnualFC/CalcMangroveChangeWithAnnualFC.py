@@ -71,8 +71,8 @@ def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcT
     mangAnnualFC.attrs['affine'] = affine
     mangAnnualFC.attrs['crs'] = crswkt
         
-    mangroveAreaPxlC = mangAnnualFC.where(mangAnnualFC > fcThreshold, 1, 0)
-    #mangroveAreaPxlC.data[numpy.isnan(mangroveAreaPxlC.data)] = 0
+    mangroveAreaPxlC = mangAnnualFC.where(mangAnnualFC > fcThreshold, 1)
+    mangroveAreaPxlC.data[numpy.isnan(mangroveAreaPxlC.data)] = 0
     mangroveAreaPxlC.attrs['affine'] = affine
     mangroveAreaPxlC.attrs['crs'] = crswkt
     
