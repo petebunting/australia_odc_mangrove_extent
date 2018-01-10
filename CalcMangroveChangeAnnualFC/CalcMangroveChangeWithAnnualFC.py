@@ -28,6 +28,9 @@ def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcT
     
     annualFC = dc.load(product='fc_percentile_albers_annual', group_by='solar_day', measurements=['PV_PC_10'], **query)
     
+    crswkt = annualFC.crs.wkt
+    affine = annualFC.affine
+    
     annualPV10th = annualFC.PV_PC_10
     
     time_sorted = annualPV10th.time.argsort()
