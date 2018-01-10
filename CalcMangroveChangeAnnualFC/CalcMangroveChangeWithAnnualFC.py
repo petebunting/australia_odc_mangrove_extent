@@ -75,7 +75,7 @@ def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcT
     mangroveAreaPxlC.attrs['affine'] = affine
     mangroveAreaPxlC.attrs['crs'] = crswkt
     
-    years = [2010, 2011, 2012, 2013, 2015]
+    years = [2010, 2011, 2012, 2013, 2014, 2015]
     if len(years) != annualPV10th.shape[0]:
         raise Exception("The list of years specified is not equal to the number of annual layers within the datacube dataset read.")
     
