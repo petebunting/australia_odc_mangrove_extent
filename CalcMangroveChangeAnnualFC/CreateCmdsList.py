@@ -40,11 +40,11 @@ for item in cmds:
 f.flush()
 f.close()
 
-"""
-outQSubFile = 'QSubCalcAnnualNDVIChange.pbs'
-outGenPBSFile = 'GenQSubCalcAnnualNDVIChangeCmds.sh'
+
+outQSubFile = 'QSubCalcAnnualMangChange.pbs'
+outGenPBSFile = 'GenQSubCalcAnnualMangChangeCmds.sh'
 f = open(outGenPBSFile, 'w')
-f.write(str('python ../../PBS/CreateQSubScripts.py --input ' + outRunLstFile + ' --output ' + outQSubFile + ' --memory 128Gb --time 30:00:00 --cores 16 --project r78')+'\n')
+f.write(str('python ../PBS/CreateQSubScripts.py --input ' + outRunLstFile + ' --output ' + outQSubFile + ' --memory 8Gb --time 30:00:00 --cores 32 --project r78')+'\n')
 f.flush()
 f.close()
-"""
+

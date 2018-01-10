@@ -47,7 +47,7 @@ def createOutputFiles(inputFile, outputFile, memory, timeStr, nCores, project):
     outCmdsFile.write("#PBS -l wd\n\n")
     
     outCmdsFile.write("module use /g/data/v10/public/modules/modulefiles\n")
-    outCmdsFile.write("module load agdc-py3-prod\n\n")
+    outCmdsFile.write("module load dea-prod\n\n")
     
     outCmdsFile.write("module load parallel\n\n")        
 
