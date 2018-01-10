@@ -14,7 +14,7 @@ def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcT
     dc = datacube.Datacube(app='CalcAnnualMangroveExtent')
 
     start_of_epoch = '2010-01-01'
-    end_of_epoch = '2011-12-31'
+    end_of_epoch = '2015-12-31'
     
     query = {'time': (start_of_epoch, end_of_epoch),}
     query['x'] = (minLon, maxLon)
@@ -71,20 +71,20 @@ def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcT
     mangAnnualFC.attrs['affine'] = affine
     mangAnnualFC.attrs['crs'] = crswkt
         
-    mangroveAreaPxlC = mangAnnualFC.where(mangAnnualFC > fcThreshold)
-    mangroveAreaPxlC.data[numpy.isnan(mangroveAreaPxlC.data)] = 0
+    mangroveAreaPxlC = mangAnnualFC.where(mangAnnualFC > fcThreshold, 1, 0)
+    #mangroveAreaPxlC.data[numpy.isnan(mangroveAreaPxlC.data)] = 0
     mangroveAreaPxlC.attrs['affine'] = affine
     mangroveAreaPxlC.attrs['crs'] = crswkt
     
     numMangPxls = numpy.sum(mangroveAreaPxlC.data[0])
     print(numMangPxls)
     
-    years = [2010, 2011]
+    years = [2010, 2011, 2012, 2013, 2015]
     if len(years) != annualPV10th.shape[0]:
         raise Exception("The list of years specified is not equal to the number of annual layers within the datacube dataset read.")
     
     
-    target_ds = gdal.GetDriverByName('KEA').Create(outImgMask, xt, yt, len(years), gdal.GDT_Byte)
+    target_ds = gdal.GetDriverByName('GTIFF').Create(outImgMask, xt, yt, len(years), gdal.GDT_Byte)
     target_ds.SetGeoTransform(geotransform)
     albers = osr.SpatialReference()
     albers.ImportFromEPSG(3577)
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     mangShpMask = '/g/data/r78/pjb552/GMW_Mang_Union/GMW_UnionMangroveExtent_v1.2_Australia_epsg3577.shp'
     
     outStatsFile = 'StatsFile.csv'
-    outImgMask = 'MangroveMask.kea'
+    outImgMask = 'MangroveMask.tif'
     fcThreshold = 30
     
     #calcMangNDVIMangPxlFromCube(args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask)
