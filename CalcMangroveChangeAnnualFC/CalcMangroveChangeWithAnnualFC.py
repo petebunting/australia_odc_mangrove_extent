@@ -9,12 +9,12 @@ from osgeo import osr
 import pandas
 
 
-def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcThreshold, outStatsFile, outImgMask):
+def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxLon, mangShpMask, fcThreshold, outStatsFile, outImgMask):
 
     dc = datacube.Datacube(app='CalcAnnualMangroveExtent')
 
-    start_of_epoch = '2010-01-01'
-    end_of_epoch = '2015-12-31'
+    start_of_epoch = str(startYear)+'-01-01'
+    end_of_epoch = str(endYear)+'-12-31'
     
     query = {'time': (start_of_epoch, end_of_epoch),}
     query['x'] = (minLon, maxLon)
@@ -75,7 +75,7 @@ def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcT
     mangroveAreaPxlC.attrs['affine'] = affine
     mangroveAreaPxlC.attrs['crs'] = crswkt
     
-    years = [2010, 2011, 2012, 2013, 2014, 2015]
+    years = numpy.arange(startYear, endYear, 1)#[2010, 2011, 2012, 2013, 2014, 2015]
     if len(years) != annualPV10th.shape[0]:
         raise Exception("The list of years specified is not equal to the number of annual layers within the datacube dataset read.")
     
@@ -130,6 +130,6 @@ if __name__ == '__main__':
     fcThreshold = 30
     
     #calcMangNDVIMangPxlFromCube(args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask)
-    calcMangNDVIMangPxlFromCube(lat_min, lat_max, lon_min, lon_max, mangShpMask, fcThreshold, outStatsFile, outImgMask)
+    calcMangNDVIMangPxlFromCube(2010, 2015, lat_min, lat_max, lon_min, lon_max, mangShpMask, fcThreshold, outStatsFile, outImgMask)
 
 
