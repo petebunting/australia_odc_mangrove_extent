@@ -9,7 +9,7 @@ from osgeo import osr
 import pandas
 
 
-def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcThreshold=30):
+def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcThreshold=30, outStatsFile, outImgMask):
 
     dc = datacube.Datacube(app='CalcAnnualMangroveExtent')
 
@@ -79,23 +79,35 @@ def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcT
     numMangPxls = numpy.sum(mangroveAreaPxlC.data[0])
     print(numMangPxls)
     
-    """        
-        years = [1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016]
-        for yearVal in years:                
-            numMangPxls = numpy.sum(mangroveAreaPxlC.sel(year=yearVal).data)
-            numClMangPxls = numpy.sum(clMangroveAreaPxlC.sel(year=yearVal).data) 
-            pxlCountSeries = pandas.Series([numMangPxls, numClMangPxls], index=['MangPxls', 'MangPxlsCl'])
-            tileAFileOut = tileAFile+'_'+str(yearVal)+'.csv'
-            pxlCountSeries.to_csv(tileAFileOut)   
-            
-            tileNCAMCFileOut = tileNCAMCFile+'_'+str(yearVal)+'.nc'
-            tileNCCMCFileOut = tileNCCMCFile+'_'+str(yearVal)+'.nc'
-            tileNCFileOut = tileNCFile+'_'+str(yearVal)+'.nc'
-            
-            mangroveAreaPxlC.sel(year=yearVal).to_netcdf(path=tileNCAMCFileOut, mode = 'w')
-            clMangroveAreaPxlC.sel(year=yearVal).to_netcdf(path=tileNCCMCFileOut, mode = 'w')                        
-            mangroveNDVIMean.sel(year=yearVal).to_netcdf(path=tileNCFileOut, mode = 'w')
-    """
+    years = [2010, 2011]
+    if len(years) != annualPV10th.shape[0]:
+        raise Exception("The list of years specified is not equal to the number of annual layers within the datacube dataset read.")
+    
+    
+    target_ds = gdal.GetDriverByName('KEA').Create(outImgMask, xt, yt, len(years), gdal.GDT_Byte)
+    target_ds.SetGeoTransform(geotransform)
+    albers = osr.SpatialReference()
+    albers.ImportFromEPSG(3577)
+    target_ds.SetProjection(albers.ExportToWkt())
+    
+        
+    pxlStatsArr = numpy.zeros([len(years)])
+    f = open(outStatsFile, 'w')
+    f.write('Year, PixelCount\n')
+    idx = 0
+    for yearVal in years:
+        pxlStatsArr[idx] = numpy.sum(mangroveAreaPxlC.data[idx])
+        f.write(str(yearVal)+', '+str(pxlStatsArr[idx])+'\n')
+        band = target_ds.GetRasterBand(idx+1)
+        band.SetNoDataValue(noDataVal)
+        band.WriteArray(mangroveAreaPxlC.data[idx])
+        band.SetDescription(str(yearVal))
+        idx = idx + 1
+    f.write('\n')
+    f.flush()
+    f.close()
+    
+    target_ds = None
 
 
 if __name__ == '__main__':
@@ -117,7 +129,10 @@ if __name__ == '__main__':
     
     mangShpMask = '/g/data/r78/pjb552/GMW_Mang_Union/GMW_UnionMangroveExtent_v1.2_Australia_epsg3577.shp'
     
+    outStatsFile = 'StatsFile.csv'
+    outImgMask = 'MangroveMask.kea'
+    
     #calcMangNDVIMangPxlFromCube(args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask)
-    calcMangNDVIMangPxlFromCube(lat_min, lat_max, lon_min, lon_max, mangShpMask)
+    calcMangNDVIMangPxlFromCube(lat_min, lat_max, lon_min, lon_max, mangShpMask, outStatsFile, outImgMask)
 
 
