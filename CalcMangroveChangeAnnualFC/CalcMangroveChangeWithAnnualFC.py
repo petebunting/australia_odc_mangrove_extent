@@ -71,13 +71,9 @@ def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcT
     mangAnnualFC.attrs['affine'] = affine
     mangAnnualFC.attrs['crs'] = crswkt
         
-    mangroveAreaPxlC = mangAnnualFC.where(mangAnnualFC > fcThreshold, 1)
-    mangroveAreaPxlC.data[numpy.isnan(mangroveAreaPxlC.data)] = 0
+    mangroveAreaPxlC = mangAnnualFC > fcThreshold
     mangroveAreaPxlC.attrs['affine'] = affine
     mangroveAreaPxlC.attrs['crs'] = crswkt
-    
-    numMangPxls = numpy.sum(mangroveAreaPxlC.data[0])
-    print(numMangPxls)
     
     years = [2010, 2011, 2012, 2013, 2015]
     if len(years) != annualPV10th.shape[0]:
