@@ -9,7 +9,7 @@ from osgeo import osr
 import pandas
 
 
-def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcThreshold=30, outStatsFile, outImgMask):
+def calcMangNDVIMangPxlFromCube(minLat, maxLat, minLon, maxLon, mangShpMask, fcThreshold, outStatsFile, outImgMask):
 
     dc = datacube.Datacube(app='CalcAnnualMangroveExtent')
 
@@ -131,8 +131,9 @@ if __name__ == '__main__':
     
     outStatsFile = 'StatsFile.csv'
     outImgMask = 'MangroveMask.kea'
+    fcThreshold = 30
     
     #calcMangNDVIMangPxlFromCube(args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask)
-    calcMangNDVIMangPxlFromCube(lat_min, lat_max, lon_min, lon_max, mangShpMask, outStatsFile, outImgMask)
+    calcMangNDVIMangPxlFromCube(lat_min, lat_max, lon_min, lon_max, mangShpMask, fcThreshold, outStatsFile, outImgMask)
 
 
