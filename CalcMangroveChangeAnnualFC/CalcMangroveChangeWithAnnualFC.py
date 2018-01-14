@@ -80,7 +80,7 @@ def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxL
         raise Exception("The list of years specified is not equal to the number of annual layers within the datacube dataset read.")
     
     
-    target_ds = gdal.GetDriverByName('GTIFF').Create(outImgMask, xt, yt, len(years), gdal.GDT_Byte)
+    target_ds = gdal.GetDriverByName('GTIFF').Create(outImgMask, xt, yt, len(years), gdal.GDT_Byte, options=["TILED=YES", "COMPRESS=DEFLATE"])
     target_ds.SetGeoTransform(geotransform)
     albers = osr.SpatialReference()
     albers.ImportFromEPSG(3577)
