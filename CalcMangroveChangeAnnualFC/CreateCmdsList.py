@@ -23,7 +23,7 @@ for tile in range(len(gmwTiles)):
     outImgTileName = 'MangExtent_'+posFileName+'.tif'
     outStatsTileName = 'MangExtentStats_'+posFileName+'.csv'
 
-    cmd = cmdBase + '--startyear 2010 --endyear 2016 --pvfcthres 30'
+    cmd = cmdBase + '--startyear 1987 --endyear 2016 --pvfcthres 30'
     cmd = cmd + ' --minlat ' + str(gmwTiles['MinY'][tile])
     cmd = cmd + ' --maxlat ' + str(gmwTiles['MaxY'][tile])
     cmd = cmd + ' --minlon ' + str(gmwTiles['MinX'][tile])
