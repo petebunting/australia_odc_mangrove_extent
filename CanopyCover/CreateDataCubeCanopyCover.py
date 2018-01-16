@@ -28,6 +28,12 @@ def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCo
 
     ############ DO STUFF ###############
     
+    # 0. Make PV no data value to be zero...
+    tmpPVImgZeroNoData = os.path.join(tmpDIR, os.path.splitext(os.path.basename(pvfDCImg))[0]+'_nodatazero.kea')
+    rsgislib.imagecalc.imageMath(pvfDCImg, tmpPVImgZeroNoData, '(b1>0)&&(b1<=100)?b1:0', 'KEA', rsgislib.TYPE_8UINT)
+    rsgislib.imageutils.popImageStats(tmpPVImgZeroNoData, usenodataval=True, nodataval=0, calcpyramids=True)
+    pvfDCImg = tmpPVImgZeroNoData # Use this version throughout rest of the processing.
+    
     # 1. Reproject the shapefile to epsg 3577
     shpInWKT = rsgisUtils.getProjWKTFromVec(canopyMaskSHP)
     inEPSGCode = rsgisUtils.getEPSGCodeFromWKT(shpInWKT)
@@ -61,7 +67,7 @@ def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCo
     
     # 5. Create Canopy Cover on pvfDCImg grid.
     tmpCanopyCountImg = os.path.join(tmpDIR, 'TmpCountImg.kea')
-    rsgislib.imagecalc.getImgSumStatsInPxl(pvfDCImg, outCanopyMaskImg, tmpCanopyCountImg, 'KEA', rsgislib.TYPE_32UINT, [rsgislib.SUMTYPE_SUM], 1, True, 16, 16)
+    rsgislib.imagecalc.getImgSumStatsInPxl(pvfDCImg, outCanopyMaskImg, tmpCanopyCountImg, 'KEA', rsgislib.TYPE_32UINT, [rsgislib.SUMTYPE_SUM], 1, False, 16, 16)
     
     nPxlsInGrid = abs(imgResX * imgResY)
     
@@ -89,7 +95,7 @@ def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCo
     rsgislib.imagecalc.getImgSumStatsInPxl(tmpLowResImg4Agg, outCanopyCoverImg, tmpAggCanopyCover, 'KEA', rsgislib.TYPE_32FLOAT, [rsgislib.SUMTYPE_MEAN], 1, True, 16, 16)
     
     tmpAggPV = os.path.join(tmpDIR, 'TmpAggPV.kea')
-    rsgislib.imagecalc.getImgSumStatsInPxl(tmpLowResImg4Agg, pvfDCImg, tmpAggPV, 'KEA', rsgislib.TYPE_32FLOAT, [rsgislib.SUMTYPE_MEAN], 1, True, 16, 16)
+    rsgislib.imagecalc.getImgSumStatsInPxl(tmpLowResImg4Agg, pvfDCImg, tmpAggPV, 'KEA', rsgislib.TYPE_32FLOAT, [rsgislib.SUMTYPE_MEAN], 1, False, 16, 16)
     
     rsgislib.imageutils.stackImageBands([tmpAggPV, tmpAggCanopyCover], ['PV','CC'], aggImageLyrsOutImg, 0.0, 0.0, 'KEA', rsgislib.TYPE_32FLOAT)
     rsgislib.imageutils.popImageStats(aggImageLyrsOutImg, usenodataval=True, nodataval=0, calcpyramids=True)
