@@ -9,7 +9,7 @@ from osgeo import osr
 import pandas
 
 
-def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxLon, mangShpMask, ccThresholds, outStatsFile, outImgMask):
+def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxLon, mangShpMask, ccThresholds, outStatsFile, outImgMask, outImgTypeMask):
 
     dc = datacube.Datacube(app='CalcAnnualMangroveExtent')
 
@@ -70,45 +70,57 @@ def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxL
     mangAnnualFC.data[numpy.isnan(mangAnnualFC.data)] = 0
     mangAnnualFC.attrs['affine'] = affine
     mangAnnualFC.attrs['crs'] = crswkt
-    
-    # Convert 10th Percentile of PV to Canopy Cover (cc = 1.48 * pv)
-    mangAnnualCC = mangAnnualFC * 1.48
-    mangAnnualCC[mangAnnualCC > 100] = 100
-    mangAnnualFC.attrs['affine'] = affine
-    mangAnnualFC.attrs['crs'] = crswkt
-    
-    mangAnnualCC[mangAnnualCC > 100] = 100
         
     mangroveAreaPxlT = mangAnnualFC > ccThresholds[0]
     mangroveAreaPxlC = mangroveAreaPxlT
-    mangroveAreaPxlC[mangAnnualFC > ccThresholds[1]] = 2
-    mangroveAreaPxlC[mangAnnualFC > ccThresholds[2]] = 3
+    numThresVals = len(ccThresholds)
+    for i in range(numThresVals-1):
+        mangroveAreaPxlC[mangAnnualFC > ccThresholds[i+1]] = i+2
     mangroveAreaPxlC.attrs['affine'] = affine
     mangroveAreaPxlC.attrs['crs'] = crswkt
     
     years = numpy.arange(startYear, endYear+1, 1)
     if len(years) != annualPV10th.shape[0]:
         raise Exception("The list of years specified is not equal to the number of annual layers within the datacube dataset read.")
-    
-    
-    target_ds = gdal.GetDriverByName('GTIFF').Create(outImgMask, xt, yt, len(years), gdal.GDT_Byte, options=["TILED=YES", "COMPRESS=DEFLATE"])
-    target_ds.SetGeoTransform(geotransform)
+        
     albers = osr.SpatialReference()
     albers.ImportFromEPSG(3577)
-    target_ds.SetProjection(albers.ExportToWkt())
     
-        
-    pxlStatsArr = numpy.zeros([len(years)], dtype=int)
+    targetImgDS = gdal.GetDriverByName('GTIFF').Create(outImgMask, xt, yt, len(years), gdal.GDT_Byte, options=["TILED=YES", "COMPRESS=DEFLATE"])
+    targetImgDS.SetGeoTransform(geotransform)
+    targetImgDS.SetProjection(albers.ExportToWkt())
+    
+    targetTypeImgDS = gdal.GetDriverByName('GTIFF').Create(outImgTypeMask, xt, yt, len(years), gdal.GDT_Byte, options=["TILED=YES", "COMPRESS=DEFLATE"])
+    targetTypeImgDS.SetGeoTransform(geotransform)
+    targetTypeImgDS.SetProjection(albers.ExportToWkt())
+    
     f = open(outStatsFile, 'w')
-    f.write('Year, PixelCount\n')
+    f.write('Year, TotalPxlCount')
+    for i in range(numThresVals):
+        f.write(', PxlCountThres'+str(i+1))
+    f.write('\n')
+    
     idx = 0
     for yearVal in years:
-        pxlStatsArr[idx] = numpy.sum(mangroveAreaPxlT.data[idx])
-        f.write(str(yearVal)+', '+str(pxlStatsArr[idx])+'\n')
-        band = target_ds.GetRasterBand(idx+1)
+        pxlCount = numpy.sum(mangroveAreaPxlT.data[idx])
+        f.write(str(yearVal)+', '+str(pxlCount[idx]))
+        for i in range(numThresVals):
+            pxlCount = numpy.sum((mangroveAreaPxlC.data[idx] == i+1))
+            f.write(', ' + str(pxlCount))
+        f.write('\n')
+        
+        # Export the Total Mangrove Area image
+        band = targetImgDS.GetRasterBand(idx+1)
+        band.SetNoDataValue(noDataVal)
+        band.WriteArray(mangroveAreaPxlT.data[idx])
+        band.SetDescription(str(yearVal))
+        
+        # Export Mangrove Cover Type Area Image
+        band = targetTypeImgDS.GetRasterBand(idx+1)
         band.SetNoDataValue(noDataVal)
         band.WriteArray(mangroveAreaPxlC.data[idx])
         band.SetDescription(str(yearVal))
+        
         idx = idx + 1
     f.write('\n')
     f.flush()
@@ -127,9 +139,10 @@ if __name__ == '__main__':
     parser.add_argument("--maxlon", type=float, required=True, help='max. lon for tile region.')
     parser.add_argument("--startyear", type=int, default=1987, required=False, help='Start year for the analysis.')
     parser.add_argument("--endyear", type=int, default=2016, required=False, help='End year for the analysis.')
-    parser.add_argument("--ccthres1", type=int, default=30, required=False, help='First Threshold for Canopy Cover.')
-    parser.add_argument("--ccthres2", type=int, default=30, required=False, help='Second Threshold for Canopy Cover.')
-    parser.add_argument("--ccthres3", type=int, default=30, required=False, help='Third Threshold for Canopy Cover.')
+    parser.add_argument("--ccthres1", type=int, default=12, required=False, help='First Threshold for Canopy Cover.')
+    parser.add_argument("--ccthres2", type=int, default=35, required=False, help='Second Threshold for Canopy Cover.')
+    parser.add_argument("--ccthres3", type=int, default=70, required=False, help='Third Threshold for Canopy Cover.')
+    parser.add_argument("--outtypeimg", type=str, required=True, help='Output image file is mangrove extent in cover classes with a band for each year.')
     parser.add_argument("--outimg", type=str, required=True, help='Output image file is mangrove extent with a band for each year.')
     parser.add_argument("--outstats", type=str, required=True, help='Output stats file with pixel count for mangrove extent.')
     
@@ -138,22 +151,5 @@ if __name__ == '__main__':
     
     mangShpMask = '/g/data/r78/pjb552/GMW_Mang_Union/GMW_UnionMangroveExtent_v1.2_Australia_epsg3577.shp'
     
-    calcMangNDVIMangPxlFromCube(args.startyear, args.endyear, args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask, [args.ccthres1, args.ccthres2, args.ccthres3], args.outstats, args.outimg)  
+    calcMangNDVIMangPxlFromCube(args.startyear, args.endyear, args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask, [args.ccthres1, args.ccthres2, args.ccthres3], args.outstats, args.outimg, args.outtypeimg)  
     
-    
-    """
-    lat_max = -17.5
-    lat_min = -17.6
-    lon_max = 140.8
-    lon_min = 140.6
-    
-    mangShpMask = '/g/data/r78/pjb552/GMW_Mang_Union/GMW_UnionMangroveExtent_v1.2_Australia_epsg3577.shp'
-    
-    outStatsFile = 'StatsFile.csv'
-    outImgMask = 'MangroveMask.tif'
-    fcThreshold = 30
-    
-    #calcMangNDVIMangPxlFromCube(args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask)
-    calcMangNDVIMangPxlFromCube(2010, 2015, lat_min, lat_max, lon_min, lon_max, mangShpMask, fcThreshold, outStatsFile, outImgMask)
-
-    """
