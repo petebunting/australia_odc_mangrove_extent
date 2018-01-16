@@ -15,7 +15,7 @@ import osgeo.osr as osr
 import osgeo.gdal as gdal
 
 
-def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCoverImg, outExtData, baseTmpDIR):
+def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCoverImg, outExtData, aggImageLyrsOutImg, aggOutExtData, aggOutRes, baseTmpDIR):
 
     rsgisUtils = rsgislib.RSGISPyUtils()
     uidStr = rsgisUtils.uidGenerator()
@@ -44,21 +44,15 @@ def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCo
         canopyMaskSHP = tmpReprojSHP
     
     # 2. Find shapefile extent.
-    print('Canopy Mask Extent')
     shpExtent = rsgisUtils.getVecLayerExtent(canopyMaskSHP)
-    print(shpExtent)
         
     # 3. Create image aligned with pvfDCImg and extent of canopyMaskSHP
     imgBBOX = rsgisUtils.getImageBBOX(pvfDCImg)
-    print(imgBBOX)
     imgResX, imgResY = rsgisUtils.getImageRes(pvfDCImg)
     if imgResX != imgResY:
         raise Exception('The input pixels are not square.')
         
-    commonExtent = rsgisUtils.findCommonExtentOnGrid(imgBBOX, imgResX, shpExtent, fullContain=True)
-    print(commonExtent)
-    
-    print(outCanopyMaskImg)
+    commonExtent = rsgisUtils.findCommonExtentOnGrid(imgBBOX, imgResX, shpExtent, fullContain=True)    
     rsgislib.imageutils.createCopyImageDefExtent(pvfDCImg, outCanopyMaskImg, 1, commonExtent[0], commonExtent[1], commonExtent[2], commonExtent[3], 1.0, 1.0, 0, 'KEA', rsgislib.TYPE_8UINT)
     
     # 4. Rasterise canopyMaskSHP
@@ -85,6 +79,27 @@ def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCo
     # 8. Export PVF and Canopy Cover to HDF5 file.    
     rsgislib.imageutils.extractZoneImageValues2HDF(tmpPVCCStackImg, tmpCanopyMaskImg, outExtData, 1)
     
+    # 9. Aggregate image layers to 1 km grids
+    imgBBOX = rsgisUtils.getImageBBOX(tmpPVCCStackImg)
+    lowResExtent = rsgisUtils.findExtentOnGrid(imgBBOX, aggOutRes, fullContain=False)
+    tmpLowResImg4Agg = os.path.join(tmpDIR, 'TmpLowResAggImg.kea')
+    rsgislib.imageutils.createCopyImageDefExtent(pvfDCImg, tmpLowResImg4Agg, 1, lowResExtent[0], lowResExtent[1], lowResExtent[2], lowResExtent[3], aggOutRes, aggOutRes, 0, 'KEA', rsgislib.TYPE_8UINT)
+    
+    tmpAggCanopyCover = os.path.join(tmpDIR, 'TmpAggCanopyCover.kea')
+    rsgislib.imagecalc.getImgSumStatsInPxl(tmpLowResImg4Agg, outCanopyCoverImg, tmpAggCanopyCover, 'KEA', rsgislib.TYPE_32FLOAT, [rsgislib.SUMTYPE_MEAN], 1, True, 16, 16)
+    
+    tmpAggPV = os.path.join(tmpDIR, 'TmpAggPV.kea')
+    rsgislib.imagecalc.getImgSumStatsInPxl(tmpLowResImg4Agg, pvfDCImg, tmpAggPV, 'KEA', rsgislib.TYPE_32FLOAT, [rsgislib.SUMTYPE_MEAN], 1, True, 16, 16)
+    
+    rsgislib.imageutils.stackImageBands([tmpAggPV, tmpAggCanopyCover], ['PV','CC'], aggImageLyrsOutImg, 0.0, 0.0, 'KEA', rsgislib.TYPE_32FLOAT)
+    rsgislib.imageutils.popImageStats(aggImageLyrsOutImg, usenodataval=True, nodataval=0, calcpyramids=True)
+    
+    # 10. Extract Aggregated data to HDF5.
+    tmpAggCanopyMaskImg = os.path.join(tmpDIR, 'TmpMaskImg.kea')
+    rsgislib.imagecalc.imageMath(tmpAggCanopyCover, tmpAggCanopyMaskImg, 'b1>0?1:0', 'KEA', rsgislib.TYPE_8UINT)
+    
+    rsgislib.imageutils.extractZoneImageValues2HDF(aggImageLyrsOutImg, tmpAggCanopyMaskImg, aggOutExtData, 1)
+    
     ####################################
     
     if not tmpPresent:
@@ -100,12 +115,15 @@ if __name__ == '__main__':
     parser.add_argument("--canopymaskdc", type=str, required=True, help='Output canopy mask image file which with a grid which corresponds to the DataCube.')
     parser.add_argument("--canopycover", type=str, required=True, help='Output canopy cover image.')
     parser.add_argument("--extractpvcc", type=str, required=True, help='Output HDF5 file with data extracted for mangrove regions.')
+    parser.add_argument("--aggimagelyrs", type=str, required=True, help='Output image layer aggregated to a lower resolution.')
+    parser.add_argument("--aggextractpvcc", type=str, required=True, help='Output HDF5 file with aggregated data extracted for mangrove regions.')
+    parser.add_argument("--aggres", type=int, required=False, default=1000, help='Aggregated output image resolution; note value must be a multiple of 25 m; Default is 1000.')
     parser.add_argument("--tmp", type=str, required=True, help='tmp DIR path.')
     
     # Call the parser to parse the arguments.
     args = parser.parse_args()
         
-    createCanopyCoverLyrs(args.dcpvf, args.canopymask, args.canopymaskdc, args.canopycover, args.extractpvcc, args.tmp)  
+    createCanopyCoverLyrs(args.dcpvf, args.canopymask, args.canopymaskdc, args.canopycover, args.extractpvcc, args.aggimagelyrs, args.aggextractpvcc, args.aggres, args.tmp)  
     
     
     
