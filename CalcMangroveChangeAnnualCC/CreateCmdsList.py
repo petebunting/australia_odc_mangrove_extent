@@ -2,9 +2,10 @@ import pandas
 import os.path
 
 gmwTiles = pandas.read_csv('./AustraliaSqGrid_MangroveRegionsV1.csv', delimiter = ',')
-cmdBase = 'python /home/552/pjb552/agdc_mangrovemonitoring/CalcMangroveChangeAnnualFC/CalcMangroveChangeWithAnnualFC.py '
-outFileImgBase = '/g/data/r78/pjb552/MangChangePVFC_V1/imgs'
-outFileStatsBase = '/g/data/r78/pjb552/MangChangePVFC_V1/stats'
+cmdBase = 'python /home/552/pjb552/agdc_mangrovemonitoring/CalcMangroveChangeAnnualCC/CalcMangroveChangeWithAnnualCC.py '
+outFileTotalImgBase = '/g/data/r78/pjb552/MangChangePVFC_V2/totalimgs'
+outFileTypeImgBase = '/g/data/r78/pjb552/MangChangePVFC_V2/typeimgs'
+outFileStatsBase = '/g/data/r78/pjb552/MangChangePVFC_V2/stats'
 cmds = []
 for tile in range(len(gmwTiles)):
     # Create lat / long file name.    
@@ -20,15 +21,17 @@ for tile in range(len(gmwTiles)):
         
     posFileName = midLatStr+'_'+midLonStr+'_'+str(gmwTiles['GridID'][tile])
    
-    outImgTileName = 'MangExtent_'+posFileName+'.tif'
+    outTotalImgTileName = 'MangTotalExtent_'+posFileName+'.tif'
+    outTypeImgTileName = 'MangTypeExtent_'+posFileName+'.tif'
     outStatsTileName = 'MangExtentStats_'+posFileName+'.csv'
 
-    cmd = cmdBase + '--startyear 1987 --endyear 2016 --pvfcthres 30'
+    cmd = cmdBase + '--startyear 1987 --endyear 2016 --ccthres1 12 --ccthres2 35 --ccthres3 70 '
     cmd = cmd + ' --minlat ' + str(gmwTiles['MinY'][tile])
     cmd = cmd + ' --maxlat ' + str(gmwTiles['MaxY'][tile])
     cmd = cmd + ' --minlon ' + str(gmwTiles['MinX'][tile])
     cmd = cmd + ' --maxlon ' + str(gmwTiles['MaxX'][tile])
-    cmd = cmd + ' --outimg ' + os.path.join(outFileImgBase, outImgTileName)
+    cmd = cmd + ' --outimg ' + os.path.join(outFileTotalImgBase, outTotalImgTileName)
+    cmd = cmd + ' --outtypeimg ' + os.path.join(outFileTypeImgBase, outTypeImgTileName)
     cmd = cmd + ' --outstats ' + os.path.join(outFileStatsBase, outStatsTileName)
     #print(cmd)
     cmds.append(cmd)
