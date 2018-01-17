@@ -9,7 +9,7 @@ from osgeo import osr
 import pandas
 
 
-def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxLon, mangShpMask, outImg):
+def extractPVForMangroveRegionsFromCube(startYear, endYear, minLat, maxLat, minLon, maxLon, mangShpMask, outImg):
 
     dc = datacube.Datacube(app='CalcAnnualMangroveExtent')
 
@@ -112,5 +112,5 @@ if __name__ == '__main__':
     
     mangShpMask = '/g/data/r78/pjb552/GMW_Mang_Union/GMW_UnionMangroveExtent_v1.2_Australia_epsg3577.shp'
     
-    calcMangNDVIMangPxlFromCube(args.startyear, args.endyear, args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask, [args.ccthres1, args.ccthres2, args.ccthres3], args.outstats, args.outimg, args.outtypeimg)  
+    extractPVForMangroveRegionsFromCube(args.startyear, args.endyear, args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask, args.outimg)  
     
