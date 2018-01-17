@@ -78,7 +78,7 @@ def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxL
     albers = osr.SpatialReference()
     albers.ImportFromEPSG(3577)
     
-    targetImgDS = gdal.GetDriverByName('KEA').Create(outImg, xt, yt, len(years), gdal.GDT_Byte])
+    targetImgDS = gdal.GetDriverByName('KEA').Create(outImg, xt, yt, len(years), gdal.GDT_Byte)
     targetImgDS.SetGeoTransform(geotransform)
     targetImgDS.SetProjection(albers.ExportToWkt())
         
