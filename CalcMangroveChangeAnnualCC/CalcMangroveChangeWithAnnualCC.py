@@ -71,18 +71,22 @@ def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxL
     mangAnnualFC.attrs['affine'] = affine
     mangAnnualFC.attrs['crs'] = crswkt
         
-    mangroveAreaPxlT = mangAnnualFC > ccThresholds[0]
-    mangroveAreaPxlC = mangroveAreaPxlT
-    numThresVals = len(ccThresholds)
-    for i in range(numThresVals-1):
-        mangroveAreaPxlC[mangAnnualFC > ccThresholds[i+1]] = i+2
-    mangroveAreaPxlC.attrs['affine'] = affine
-    mangroveAreaPxlC.attrs['crs'] = crswkt
-    
     years = numpy.arange(startYear, endYear+1, 1)
     if len(years) != annualPV10th.shape[0]:
         raise Exception("The list of years specified is not equal to the number of annual layers within the datacube dataset read.")
-        
+    
+    mangroveAreaPxlT = mangAnnualFC > ccThresholds[0]
+    mangroveAreaPxlC = mangAnnualFC.copy(True)
+    numThresVals = len(ccThresholds)
+    for i in range(len(years)):
+        mangroveAreaPxlC.data[i] = 0
+        for j in range(numThresVals):
+            mangroveAreaPxlC.data[i][mangAnnualFC.data[i] > ccThresholds[j]] = j+1
+    mangroveAreaPxlC.attrs['affine'] = affine
+    mangroveAreaPxlC.attrs['crs'] = crswkt
+    mangroveAreaPxlT.attrs['affine'] = affine
+    mangroveAreaPxlT.attrs['crs'] = crswkt
+    
     albers = osr.SpatialReference()
     albers.ImportFromEPSG(3577)
     
@@ -103,7 +107,7 @@ def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxL
     idx = 0
     for yearVal in years:
         pxlCount = numpy.sum(mangroveAreaPxlT.data[idx])
-        f.write(str(yearVal)+', '+str(pxlCount[idx]))
+        f.write(str(yearVal)+', '+str(pxlCount))
         for i in range(numThresVals):
             pxlCount = numpy.sum((mangroveAreaPxlC.data[idx] == i+1))
             f.write(', ' + str(pxlCount))
@@ -126,7 +130,8 @@ def calcMangNDVIMangPxlFromCube(startYear, endYear, minLat, maxLat, minLon, maxL
     f.flush()
     f.close()
     
-    target_ds = None
+    targetImgDS = None
+    targetTypeImgDS = None
 
 
 if __name__ == '__main__':
