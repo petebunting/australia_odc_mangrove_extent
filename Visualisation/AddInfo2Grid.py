@@ -21,7 +21,9 @@ def calcStats(data, gridID):
     StdTotalVal = data[gridID, 'total'].std()/data[gridID, 'total'].mean()
     MaxStdTotVal = numpy.max([data[gridID, 'low'].std(), data[gridID, 'mid'].std(), data[gridID, 'high'].std()])/data[gridID, 'total'].mean()
     MangAreaVal = data[gridID, 'total'].mean()
-    return maxDiffYear, StdTotalVal, MaxStdTotVal, MangAreaVal
+    diff8716AreaVal = data[gridID, 'total']['2016'] - data[gridID, 'total']['1987']
+    diff1216AreaVal = data[gridID, 'total']['2016'] - data[gridID, 'total']['2012']
+    return maxDiffYear, StdTotalVal, MaxStdTotVal, MangAreaVal, diff8716AreaVal, diff1216AreaVal
 
 
 
@@ -59,6 +61,10 @@ maxStdTotalField = ogr.FieldDefn("MaxStdTot", ogr.OFTReal)
 outLayer.CreateField(maxStdTotalField)
 meanAreaField = ogr.FieldDefn("MangArea", ogr.OFTInteger)
 outLayer.CreateField(meanAreaField)
+diff8716AreaField = ogr.FieldDefn("d8716Area", ogr.OFTInteger)
+outLayer.CreateField(diff8716AreaField)
+diff1216AreaField = ogr.FieldDefn("d1216Area", ogr.OFTInteger)
+outLayer.CreateField(diff1216AreaField)
 
 outLayerDefn = outLayer.GetLayerDefn()
 
@@ -74,12 +80,14 @@ while inFeature:
         for i in range(0, inLayerDefn.GetFieldCount()):
             outFeature.SetField(outLayerDefn.GetFieldDefn(i).GetNameRef(), inFeature.GetField(i))
         
-        YearMaxVal, StdTotalVal, MaxStdTotVal, MangAreaVal = calcStats(data, gridID)
+        YearMaxVal, StdTotalVal, MaxStdTotVal, MangAreaVal, diff8716AreaVal, diff1216AreaVal = calcStats(data, gridID)
         
         outFeature.SetField("YearMax", YearMaxVal)
         outFeature.SetField("StdTotal", StdTotalVal)
         outFeature.SetField("MaxStdTot", MaxStdTotVal)
         outFeature.SetField("MangArea", MangAreaVal)
+        outFeature.SetField("d8716Area", float(diff8716AreaVal))
+        outFeature.SetField("d1216Area", float(diff1216AreaVal))
         
         outLayer.CreateFeature(outFeature)
         outFeature = None
