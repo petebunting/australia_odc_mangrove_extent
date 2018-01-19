@@ -3,7 +3,7 @@ import os.path
 
 gmwTiles = pandas.read_csv('./AustraliaSqGrid_MangroveRegionsV1.csv', delimiter = ',')
 cmdBase = 'python /home/552/pjb552/agdc_mangrovemonitoring/ExtractAnnualPVInMangMask/ExtractPVInMangAreas.py '
-outFileImgBase = '/g/data/r78/pjb552/MangChangePVFC_V2/pvimgs'
+outFileImgBase = '/g/data/r78/pjb552/MangChangePVFC_V2/pvimgstif'
 cmds = []
 for tile in range(len(gmwTiles)):
     # Create lat / long file name.    
@@ -19,7 +19,7 @@ for tile in range(len(gmwTiles)):
         
     posFileName = midLatStr+'_'+midLonStr+'_'+str(gmwTiles['GridID'][tile])
    
-    outImgTileName = 'PV2GMW_MangExtent_'+posFileName+'.kea'
+    outImgTileName = 'PV2GMW_MangExtent_'+posFileName+'.tif'
 
     cmd = cmdBase + '--startyear 1987 --endyear 2016  '
     cmd = cmd + ' --minlat ' + str(gmwTiles['MinY'][tile])

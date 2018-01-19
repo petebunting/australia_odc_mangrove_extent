@@ -78,7 +78,7 @@ def extractPVForMangroveRegionsFromCube(startYear, endYear, minLat, maxLat, minL
     albers = osr.SpatialReference()
     albers.ImportFromEPSG(3577)
     
-    targetImgDS = gdal.GetDriverByName('KEA').Create(outImg, xt, yt, len(years), gdal.GDT_Byte)
+    targetImgDS = gdal.GetDriverByName('GTIFF').Create(outImg, xt, yt, len(years), gdal.GDT_Byte, options=["TILED=YES", "COMPRESS=DEFLATE"])
     targetImgDS.SetGeoTransform(geotransform)
     targetImgDS.SetProjection(albers.ExportToWkt())
         
