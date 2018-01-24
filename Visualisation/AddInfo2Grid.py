@@ -23,14 +23,18 @@ def calcStats(data, gridID):
     MangAreaVal = data[gridID, 'total'].mean()
     diff8716AreaVal = data[gridID, 'total']['2016'] - data[gridID, 'total']['1987']
     diff1216AreaVal = data[gridID, 'total']['2016'] - data[gridID, 'total']['2012']
-    return maxDiffYear, StdTotalVal, MaxStdTotVal, MangAreaVal, diff8716AreaVal, diff1216AreaVal
+    diff9110AreaVal = data[gridID, 'total']['2010'] - data[gridID, 'total']['1991']
+    diff1016AreaVal = data[gridID, 'total']['2016'] - data[gridID, 'total']['2010']
+    diff9116AreaVal = data[gridID, 'total']['2016'] - data[gridID, 'total']['1991']
+    
+    return maxDiffYear, StdTotalVal, MaxStdTotVal, MangAreaVal, diff8716AreaVal, diff1216AreaVal, diff9110AreaVal, diff1016AreaVal, diff9116AreaVal
 
 
 
 gridSHP = '/Users/pete/Temp/AustralianMangroves/AustraliaSqGrid_MangroveRegionsV1.shp'
-outGridSHP = '/Users/pete/Temp/AustralianMangroves/AustraliaSqGrid_MangroveRegionsV1_ExtraV2Info.shp'
+outGridSHP = '/Users/pete/Temp/AustralianMangroves/AustraliaSqGrid_MangroveRegionsV1_ExtraV3Info.shp'
 
-data = pandas.read_pickle("MangChangePVFC_V2_1987_to_2016.pkl.gz", compression="gzip")
+data = pandas.read_pickle("MangChangePVFC_V3.0_1987_to_2016.pkl.gz", compression="gzip")
 
 inDataSet = gdal.OpenEx(gridSHP, gdal.OF_VECTOR )
 if inDataSet is None:
@@ -65,6 +69,12 @@ diff8716AreaField = ogr.FieldDefn("d8716Area", ogr.OFTInteger)
 outLayer.CreateField(diff8716AreaField)
 diff1216AreaField = ogr.FieldDefn("d1216Area", ogr.OFTInteger)
 outLayer.CreateField(diff1216AreaField)
+diff9110AreaField = ogr.FieldDefn("d9110Area", ogr.OFTInteger)
+outLayer.CreateField(diff9110AreaField)
+diff1016AreaField = ogr.FieldDefn("d1016Area", ogr.OFTInteger)
+outLayer.CreateField(diff1016AreaField)
+diff9116AreaField = ogr.FieldDefn("d9116Area", ogr.OFTInteger)
+outLayer.CreateField(diff9116AreaField)
 
 outLayerDefn = outLayer.GetLayerDefn()
 
@@ -80,7 +90,7 @@ while inFeature:
         for i in range(0, inLayerDefn.GetFieldCount()):
             outFeature.SetField(outLayerDefn.GetFieldDefn(i).GetNameRef(), inFeature.GetField(i))
         
-        YearMaxVal, StdTotalVal, MaxStdTotVal, MangAreaVal, diff8716AreaVal, diff1216AreaVal = calcStats(data, gridID)
+        YearMaxVal, StdTotalVal, MaxStdTotVal, MangAreaVal, diff8716AreaVal, diff1216AreaVal, diff9110AreaVal, diff1016AreaVal, diff9116AreaVal = calcStats(data, gridID)
         
         outFeature.SetField("YearMax", YearMaxVal)
         outFeature.SetField("StdTotal", StdTotalVal)
@@ -88,6 +98,9 @@ while inFeature:
         outFeature.SetField("MangArea", MangAreaVal)
         outFeature.SetField("d8716Area", float(diff8716AreaVal))
         outFeature.SetField("d1216Area", float(diff1216AreaVal))
+        outFeature.SetField("d9110Area", float(diff9110AreaVal))
+        outFeature.SetField("d1016Area", float(diff1016AreaVal))
+        outFeature.SetField("d9116Area", float(diff9116AreaVal))
         
         outLayer.CreateFeature(outFeature)
         outFeature = None

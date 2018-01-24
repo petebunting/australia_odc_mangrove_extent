@@ -39,7 +39,7 @@ def GenZoneMangroveChangePlots(zonesSHP, zoneNameCol, plotPathDIR, dataFile, gri
         os.makedirs(tmpDIR)
         tmpPresent = False 
 
-    ############ DO STUFF ###############
+    ############ DO STUFF ###############
         
     zonesDataSet = gdal.OpenEx(zonesSHP, gdal.OF_VECTOR )
     if zonesDataSet is None:
@@ -90,10 +90,10 @@ def GenZoneMangroveChangePlots(zonesSHP, zoneNameCol, plotPathDIR, dataFile, gri
                 gridIDs.append(int(gridFeat.GetField(gridIDCol)))
             print(gridIDs)
             
-            zoneName = zonesFeat.GetField(zoneNameCol)
+            zoneName = str(zonesFeat.GetField(zoneNameCol))
             print(zoneName)
             zoneNameNoSpace = zoneName.replace(' ', '_')
-            outTypePlotFile = os.path.join(plotPathDIR, zoneNameNoSpace+'_totalAreaType.pdf')
+            outTypePlotFile = os.path.join(plotPathDIR, zoneNameNoSpace+'_totalAreaType.png')
             createPlots(dataFile, gridIDs, outTypePlotFile, zoneName)
             
         zonesFeat = zonesLyr.GetNextFeature()
