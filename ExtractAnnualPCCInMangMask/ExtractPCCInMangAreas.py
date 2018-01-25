@@ -73,7 +73,7 @@ def extractPCCForMangroveRegionsFromCube(startYear, endYear, minLat, maxLat, min
     
     mangAnnualPCC = ((mangAnnualFC**3)*-0.0002) + ((mangAnnualFC**2)*0.0216) + (mangAnnualFC*0.5244) + 7.7984
     mangAnnualPCC.data[mangAnnualPCC.data > 100] = 255
-    mangAnnualPCC.data[mangAnnualPCC.data < 0] = 0
+    mangAnnualPCC.data[mangAnnualPCC.data <= 0] = 255
     mangAnnualPCC.attrs['affine'] = affine
     mangAnnualPCC.attrs['crs'] = crswkt
         
