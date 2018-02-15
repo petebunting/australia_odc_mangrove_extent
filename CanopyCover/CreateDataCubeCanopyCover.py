@@ -58,7 +58,11 @@ def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCo
     if imgResX != imgResY:
         raise Exception('The input pixels are not square.')
         
-    commonExtent = rsgisUtils.findCommonExtentOnGrid(imgBBOX, imgResX, shpExtent, fullContain=True)    
+    commonExtent = rsgisUtils.findCommonExtentOnGrid(imgBBOX, imgResX, shpExtent, fullContain=True)
+    #print(imgResX)
+    #print(commonExtent)
+    #print(outCanopyMaskImg)
+    #print(pvfDCImg)
     rsgislib.imageutils.createCopyImageDefExtent(pvfDCImg, outCanopyMaskImg, 1, commonExtent[0], commonExtent[1], commonExtent[2], commonExtent[3], 1.0, 1.0, 0, 'KEA', rsgislib.TYPE_8UINT)
     
     # 4. Rasterise canopyMaskSHP
@@ -85,6 +89,7 @@ def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCo
     # 8. Export PVF and Canopy Cover to HDF5 file.    
     rsgislib.imageutils.extractZoneImageValues2HDF(tmpPVCCStackImg, tmpCanopyMaskImg, outExtData, 1)
     
+    """
     # 9. Aggregate image layers to 1 km grids
     imgBBOX = rsgisUtils.getImageBBOX(tmpPVCCStackImg)
     lowResExtent = rsgisUtils.findExtentOnGrid(imgBBOX, aggOutRes, fullContain=False)
@@ -105,6 +110,7 @@ def createCanopyCoverLyrs(pvfDCImg, canopyMaskSHP, outCanopyMaskImg, outCanopyCo
     rsgislib.imagecalc.imageMath(tmpAggCanopyCover, tmpAggCanopyMaskImg, 'b1>0?1:0', 'KEA', rsgislib.TYPE_8UINT)
     
     rsgislib.imageutils.extractZoneImageValues2HDF(aggImageLyrsOutImg, tmpAggCanopyMaskImg, aggOutExtData, 1)
+    """
     
     ####################################
     
