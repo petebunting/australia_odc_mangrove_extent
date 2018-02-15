@@ -85,7 +85,7 @@ gdal.RasterizeLayer(target_ds, [1], source_layer, burn_values=[1])
 # Read as array the GMW mask
 gmwMaskArr = band.ReadAsArray()
 
-annualPV10th = annualPV10th.where(annualWetFreq>0.5)
+annualPV10th = annualPV10th.where(annualWetFreq<0.7)
 annualPV10th.data[numpy.isnan(annualPV10th.data)] = 0
 
 mangAnnualFC = annualPV10th.where(gmwMaskArr == 1)
