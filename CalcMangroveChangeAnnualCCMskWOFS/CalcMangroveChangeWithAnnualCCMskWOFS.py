@@ -165,7 +165,7 @@ if __name__ == '__main__':
     # Call the parser to parse the arguments.
     args = parser.parse_args()
     
-    mangShpMask = '/g/data/r78/pjb552/GMW_Mang_Union/GMW_UnionMangroveExtent_v1.2_Australia_epsg3577.shp'
+    mangShpMask = '/g/data/r78/pjb552/GMW_Mang_Union/GMW_UnionMangroveExtent_v1.3_Australia_epsg3577.shp'
     
     calcMangNDVIMangPxlFromCube(args.startyear, args.endyear, args.minlat, args.maxlat, args.minlon, args.maxlon, mangShpMask, [args.ccthres1, args.ccthres2, args.ccthres3], args.outstats, args.outimg, args.outtypeimg)  
     

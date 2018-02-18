@@ -3,9 +3,9 @@ import os.path
 
 gmwTiles = pandas.read_csv('./AustraliaSqGrid_MangroveRegionsV1.csv', delimiter = ',')
 cmdBase = 'python /home/552/pjb552/agdc_mangrovemonitoring/CalcMangroveChangeAnnualCCMskWOFS/CalcMangroveChangeWithAnnualCCMskWOFS.py '
-outFileTotalImgBase = '/g/data/r78/pjb552/MangChangePVFC_V4/totalimgs'
-outFileTypeImgBase = '/g/data/r78/pjb552/MangChangePVFC_V4/typeimgs'
-outFileStatsBase = '/g/data/r78/pjb552/MangChangePVFC_V4/stats'
+outFileTotalImgBase = '/g/data/r78/pjb552/MangChangePVFC_V5/totalimgs'
+outFileTypeImgBase = '/g/data/r78/pjb552/MangChangePVFC_V5/typeimgs'
+outFileStatsBase = '/g/data/r78/pjb552/MangChangePVFC_V5/stats'
 cmds = []
 for tile in range(len(gmwTiles)):
     # Create lat / long file name.    
